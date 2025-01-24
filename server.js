@@ -29,6 +29,9 @@ wss.on("connection", (ws) => {
     const coinName = `${word} (Score: ${rating}/10)`;
     const coinDescription = `This is the ${++totalCoins}th coin created by examplescript.py with a score of ${rating}/10.`;
 
+    // Send a redirect action to the frontend
+    ws.send(JSON.stringify({ action: "redirect", url: "https://pump.fun/create" }));
+
     const randomImage = fs
       .readdirSync(path.join(__dirname, "images"))
       .filter((file) => /\.(png|jpg|jpeg)$/i.test(file))[Math.floor(Math.random() * 10)];
