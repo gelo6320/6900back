@@ -21,18 +21,32 @@ wss.on("connection", (ws) => {
   ws.on("message", (message) => {
     console.log("Received from client:", message);
 
-    // Simulate processing and send instructions to the client
-    ws.send(
-      JSON.stringify({
-        action: "fillForm",
-        url: "https://pump.fun/create",
-        fields: {
-          name: "Example Coin",
-          ticker: "EXMP",
-          description: "This is an example coin.",
-        },
-      })
-    );
+    try {
+      // Parse the message from the client
+      const { word } = JSON.parse(message);
+
+      // Send instructions to the client
+      ws.send(
+        JSON.stringify({
+          action: "fillForm",
+          url: "https://pump.fun/create",
+          fields: {
+            name: `${word} Coin`,
+            ticker: word.slice(0, 4).toUpperCase(),
+            description: `This is a coin created with the word "${word}".`,
+          },
+          imagePath: "/path/to/image.png", // Replace with the actual image path or URL
+        })
+      );
+    } catch (error) {
+      console.error("Error processing message:", error.message);
+      ws.send(
+        JSON.stringify({
+          action: "error",
+          message: "Failed to process the message. Please check the input format.",
+        })
+      );
+    }
   });
 
   ws.on("close", () => {
