@@ -5,11 +5,24 @@ const path = require("path");
 const fs = require("fs");
 
 const app = express();
-const wss = new WebSocket.Server({ port: 8080 });
+const PORT = process.env.PORT || 3000; // Use Render's assigned port
+
+// Serve any static files if needed
+app.use(express.static("public"));
+
+// Start HTTP server
+const server = app.listen(PORT, () => {
+  console.log(`Backend listening on port ${PORT}`);
+});
+
+// WebSocket setup on the same server
+const wss = new WebSocket.Server({ server });
 
 let totalCoins = 0;
 
 wss.on("connection", (ws) => {
+  console.log("WebSocket connection established!");
+
   ws.on("message", async (message) => {
     const { word } = JSON.parse(message);
     const rating = Math.floor(Math.random() * 10) + 1; // Random rating 1-10
@@ -45,6 +58,8 @@ wss.on("connection", (ws) => {
       await browser.close();
     }
   });
-});
 
-app.listen(3000, () => console.log("Backend listening on port 3000"));
+  ws.on("close", () => {
+    console.log("WebSocket connection closed");
+  });
+});
